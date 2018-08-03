@@ -1,0 +1,47 @@
+
+.user-request{
+	
+}
+.user-request > div{
+	width: 55%;
+}
+.server-response{
+	
+	
+}
+.server-response > div{
+	width: 55%;
+	
+}
+
+#responseTable{
+	border :1px;
+}
+
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th{
+	border-top:0px !important;
+	width: 100%;
+}
+
+
+.server-response > div{
+	margin-bottom: 0px;
+}
+.user-request > div{
+	margin-bottom: 0px;
+}
+
+.server-response > div > button{
+	margin-bottom: 5px;
+	width:100%;
+}
+.table{
+	display:block;
+	height: 500px;
+	width: 100%;
+  overflow-y: scroll;
+	background-color: #eaecef;
+}
+.table >tbody{
+	
+}
