@@ -1,0 +1,194 @@
+<html>
+<head>
+	<title>API Example</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	
+	<link rel="stylesheet" href="/hotline/testing/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet"
+		href="/hotline/testing/bootstrap/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet"
+		href="/hotline/testing/bootstrap/ionicons-2.0.1/css/ionicons.min.css">
+	
+	<link rel="stylesheet" href="/hotline/testing/plugins/jQueryUI/themes/base/jquery-ui.css">
+	<link rel="stylesheet" href="/hotline/testing/plugins/jQueryUI/themes/base/tooltip.css">
+	
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script type="text/javascript">
+
+		var accessToken = "33ded4eaee3a43c6bc75930f964a3b3e";
+		var baseUrl = "https://api.api.ai/v1/";
+
+		$(document).ready(function() {
+			$("#input").keypress(function(event) {
+				if (event.which == 13) {
+					event.preventDefault();
+					setInputText();
+					send();
+				}
+			});
+			$("#rec").click(function(event) {
+				switchRecognition();
+			});
+			
+			$("#send").click(function(event) {
+				setInputText();
+				send();
+			});
+		});
+
+		var recognition;
+
+		function startRecognition() {
+			recognition = new webkitSpeechRecognition();
+			recognition.onstart = function(event) {
+				updateRec();
+			};
+			recognition.onresult = function(event) {
+				var text = "";
+			    for (var i = event.resultIndex; i < event.results.length; ++i) {
+			    	text += event.results[i][0].transcript;
+			    }
+			    setInput(text);
+				stopRecognition();
+			};
+			recognition.onend = function() {
+				stopRecognition();
+			};
+			recognition.lang = "en-US";
+			recognition.start();
+		}
+	
+		function stopRecognition() {
+			if (recognition) {
+				recognition.stop();
+				recognition = null;
+			}
+			updateRec();
+		}
+
+		function switchRecognition() {
+			if (recognition) {
+				stopRecognition();
+			} else {
+				startRecognition();
+			}
+		}
+
+		function setInput(text) {
+			$("#input").val(text);
+			send();
+		}
+
+		function updateRec() {
+			$("#rec").text(recognition ? "Stop" : "Speak");
+		}
+
+		function send() {
+			var text = $("#input").val();
+			$.ajax({
+				type: "POST",
+				url: baseUrl + "query?v=20150910",
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				headers: {
+					"Authorization": "Bearer " + accessToken
+				},
+				data: JSON.stringify({ query: text, lang: "en", sessionId: "somerandomthing" }),
+
+				success: function(data) {
+					setResponse(JSON.stringify(data, undefined, 2));
+					
+					setResponseText(data.result.fulfillment.messages);
+					
+				},
+				error: function() {
+					setResponse("Internal Server Error");
+				}
+			});
+			setResponse("Loading...");
+		}
+
+		function setResponse(val) {
+			$("#response").text(val);
+			
+						
+			
+		}
+		
+		function setResponseText(messages){
+			
+			$(messages).each(function(index,element){
+				
+				$("#chat").text($("#chat").text() + "- " + element.speech +"\r\n");
+			});
+			
+			
+			
+		}
+		
+		function setInputText(){
+			var inputText = $("#input").val();
+			$("#chat").text($("#chat").text() +"+ " +inputText +"\r\n");
+		}
+
+	</script>
+	<style type="text/css">
+		body { width: 500px; margin: 0 auto; text-align: center; margin-top: 20px; }
+		div {  position: absolute; }
+		input { width: 400px; }
+		button { width: 50px; }
+		textarea { width: 100%; }
+	</style>
+</head>
+<body>
+	<div class=>
+		<input id="input" type="text"> <button id="send">Send</button> <button id="rec">Speak</button>
+	
+		<div class="col-md-6">
+			<div class="b-agent-demo">
+
+				<div class="b-agent-demo_header">
+					<div class="b-agent-demo_header-icon">
+				
+					</div>
+					<div class="b-agent-demo_header-wrapper">
+						<div class="b-agent-demo_header-agent-name">WinMedSupportBot</div>
+						<div class="b-agent-demo_header-description"></div>
+					</div>
+				</div>
+			
+				<div class="b-agent-demo_result" id="resultWrapper">
+					<table class="b-agent-demo_result-table">
+						<tbody>
+							<tr>
+								<td id="result"><div class="user-request">hi</div>
+									<div class="server-response">Haben Sie eine Frage zur
+										Bedienung oder ein technisches Problem?</div></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="clearfix"></div>
+				<div class="b-agent-demo_input">
+					<form id="agentDemoForm">
+						<input type="text" name="q" id="query"
+							placeholder="Stellen Sie ihre Frage..."> <i
+							class="b-agent-demo_input-microphone material-icons-extended"
+							id="mic" style="display: block;">mic</i>
+
+						<!--div class="b-agent-demo_input-microphone material-icons-extended mic-black" id="mic"></div-->
+					</form>
+				</div>
+			</div>
+		</div>
+	
+		<table id="responseTable">
+		
+		
+		</table>
+		
+		<br>Chat<br> <textarea id="chat" cols="40" rows="20"></textarea><br>
+		<br>Response<br> <textarea id="response" cols="40" rows="20"></textarea>
+	</div>
+</body>
+</html>

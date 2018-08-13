@@ -7,22 +7,22 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+    <!--<link rel="icon" href="../../favicon.ico">-->
 
-    <title>Starter Template for Bootstrap</title>
+    <title>Chatbot</title>
 
     <!-- Bootstrap core CSS -->
     <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <link href="bootstrap/dist/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+    <!--<link href="bootstrap/dist/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">-->
 
     <!-- Custom styles for this template -->
     <link href="starter-template.css" rel="stylesheet">
     
     <link href="css/chat.css" rel="stylesheet">
 
-   
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -57,31 +57,63 @@
     <div class="container">
 
       <div class="starter-template">
-        <h1>Chatbot WebClient</h1>
+        <!--<h1>Chatbot WebClient</h1>-->
        
+		<div class="row">
+			<div class="col-md-4">
+				<div class="panel panel-default">
+				  <div class="panel-heading">
+					<h3 class="panel-title"><b>Mögliche Fragen</b></h3>
+				  </div>
+				  <div class="panel-body example-questions">
+					Wie kann man einen Rechnungslauf starten?<br/>
+					Was ist Mediport?<br/>
+					Wie erstellt man eine Statistik?<br/>
+				  </div>
+				</div>
+				<div class="panel panel-default">
+				  <div class="panel-heading">
+					<h3 class="panel-title"><b>Kontakt</b></h3>
+				  </div>
+				  <div class="panel-body">
+					<h4 class="mb-sm">Telefon</h4>
+					<p class="font-size-lg">
+						<a href="tel:+41619569920">+41 (0)12 124 12 12</a> <br> <i>Mo.
+						- Fr.:<br> 08:00 - 12:00 Uhr <br> 13:00 - 17:00 Uhr
+						</i>
+					</p>
+				  </div>
+				</div>
+			</div>
+			<div class="col-md-8 table-responsive">
+				<table class="table" id="responseTable">
+					<tbody>
+					</tbody>
+				</table>
+			</div>	
+		</div>
+		<div class="row">
+			<div class="col-md-4">
+			</div>
+			<div class="col-md-8">
+				<form class="form" action="#">
+				    <div class="input-group">
+					  <input type="text" class="form-control" id="input" placeholder="Text eingeben um zu chatten..." autocomplete="off">
+					  <span class="input-group-btn">
+						<button class="btn btn-default" type="submit" id="send">Senden</button>
+					  </span>
+					</div>		   
+				</form>
+			</div>
+		</div>
+		
+		
 
-		<table class="table " id="responseTable">
-			<tbody >
-			
-			
-			</tbody>
 		
 		
-		</table>
-		
-		<form>
-  <div class="form-group">
-    <label for="input"></label>
-    <input type="text" class="form-control" id="input" placeholder="Text eingeben um zu chatten...">
-  </div>
- 
-
-  <button type="submit" id="send" class="btn btn-default">Senden</button>
-</form>
-		
-		
-		
+		<div class="hide">
 		<br>Response<br> <textarea id="response" cols="40" rows="20"></textarea>
+		</div>
        
       </div>
 
@@ -93,9 +125,9 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-    <script src="../../dist/js/bootstrap.min.js"></script>
+    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+    <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
     
     <script src="js/dialogflow.js"></script>
   </body>

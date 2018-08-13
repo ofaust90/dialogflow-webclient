@@ -1,13 +1,16 @@
 
-		var accessToken = "YOUR_TOKEN";
+		var accessToken = "";
 		var baseUrl = "https://api.api.ai/v1/";
 
 		$(document).ready(function() {
 			$("#input").keypress(function(event) {
 				if (event.which == 13) {
 					event.preventDefault();
-					setInputText();
-					send($("#input").val());
+					if ($("#input").val().replace(/\s/g, "").length > 0) {
+						setInputText();
+						send($("#input").val());
+					}
+					
 				}
 			});
 			$("#rec").click(function(event) {
@@ -15,12 +18,15 @@
 			});
 			
 			$("#send").click(function(event) {
-				setInputText();
-				send($("#input").val());
+				if ($("#input").val().replace(/\s/g, "").length > 0) {
+					setInputText();
+					send($("#input").val());
+				}
 			});
+			
+			send("start");
 		});
 
-		/* NOT USED IN THIS CASE
 		var recognition;
 
 		function startRecognition() {
@@ -50,7 +56,7 @@
 			}
 			updateRec();
 		}
-		
+
 		function switchRecognition() {
 			if (recognition) {
 				stopRecognition();
@@ -58,22 +64,17 @@
 				startRecognition();
 			}
 		}
-		
-		function updateRec() {
-			$("#rec").text(recognition ? "Stop" : "Speak");
-		}
 
-		*/
 		function setInput(text) {
 			$("#input").val(text);
 			send();
 		}
 
-		
+		function updateRec() {
+			$("#rec").text(recognition ? "Stop" : "Speak");
+		}
 
-		
 		function sendBtn(e){
-			
 			console.log(this);
 			var postback = $(this).attr("data-postback");
 			console.log(postback);
@@ -81,7 +82,14 @@
 		}
 		
 		function send(text) {
-		
+			var loading = $("<div class='lds-ellipsis'><div></div><div></div><div></div><div></div>");
+			var messageContainer = $("<tr><td class='server-response'><div class='alert  pull-right'></div></td></tr>");
+			messageContainer.find("div").append(loading);
+
+			$("#responseTable >tbody").append(messageContainer);
+			console.log(messageContainer);
+			var objDiv = document.getElementById("responseTable");
+			objDiv.scrollTop = objDiv.scrollHeight;
 			$.ajax({
 				type: "POST",
 				url: baseUrl + "query?v=20150910",
@@ -94,11 +102,11 @@
 
 				success: function(data) {
 					setResponse(JSON.stringify(data, undefined, 2));
-					
-					setResponseText(data.result.fulfillment.messages);
-					
+					setResponseText(data.result, messageContainer);
 				},
 				error: function() {
+					messageContainer.find("div").empty();
+					messageContainer.find("div").append("<p>Internal Server Error</p>");
 					setResponse("Internal Server Error");
 				}
 			});
@@ -106,78 +114,98 @@
 		}
 
 		function setResponse(val) {
-			$("#response").text(val);
-			
-						
-			
+			$("#response").text(val);	
 		}
-		
-		function setResponseText(messages){
-			
-			
-			
-			$(messages).each(function(index,element){
-				
-				
-				if(element.type == 0){
-					$("#chat").text($("#chat").text() + "- " + element.speech +"\r\n");
-					
-					$("#responseTable >tbody").append("<tr><td class='server-response'><div class='alert alert-success pull-right'>"+element.speech+"</td></tr>");	
-				}else if(element.type == 4){
-					
-					var trElement = $("<tr><td class='server-response'><div class='alert alert-success pull-right'></td></tr>");
-					
-					
-					if(element.payload.buttons == undefined){
-		
-					var button = "<button class='btn btn-primary' data-postback="+element.payload.postback+">"+element.payload.text+"</button>";
-					$("#responseTable >tbody").append("<tr><td class='server-response'><div class='alert alert-success pull-right'>"+button+"</td></tr>");
-					}else{
-						
-						var buttons = element.payload.buttons;
-						var tr = $("<tr></tr>");
-						var btnHtml = "";
-						$(buttons).each(function(index,element){
-							
-						
-							var button = "<button   class='btn btn-primary' data-postback="+element.postback+">"+element.text+"</button>";
-						
-							var btnEl = $(button);
-						
-						
-							btnEl.click(  sendBtn );
-							
-							
-						    btnHtml += button +"<br>";
-						    trElement.find('div').append(btnEl);
-						    trElement.find('div').append("<br>");
-						}) 
-					
-						$("#responseTable >tbody").append(trElement);
+
+		function setResponseText(result, messageContainer){
+			messageContainer.find("div").empty();
+			if (result.action == "question.question-custom") {
+				var trElement = $("<div><h4>"+result.fulfillment.speech+"</h4><hr /><div class='list-group'></div></duv>");
+				var trElementButtons;
+				$(result.fulfillment.messages).each(function(index,element){
+					if (element.type == 1) {
+						trElement.find(".list-group").append("<a class='list-group-item' href='http://kb.example.ch/files"+element.imageUrl+"'><h4 class='list-group-item-heading'>"+element.title+"</h4><p class='list-group-item-text'>Knowledgebase Artikel</p></a>");
+					} else if (element.type == 4) {
+						trElementButtons = parseType4(element).contents();
 					}
+				});
+				if (result.fulfillment.messages.length > 2) {
+					trElement.find("a").css("display", "none");
+					trElement.find("a").slice(0, 3).css("display", "block");
+					trElement.find(".list-group").append("<br /><a class='btn-showmore'>Mehr anzeigen</a>");
 				}
-				
-			});
-			
-			
+				messageContainer.find(".alert").append(trElement.contents());
+				messageContainer.find(".alert").append(trElementButtons);
+			} else {
+				$(result.fulfillment.messages).each(function(index,element){
+					if(element.type == 0) {
+						// single text record
+						messageContainer.find(".alert").last().append(element.speech);
+						if (result.fulfillment.messages.length > index && result.fulfillment.messages[index + 1].type == 0) {
+							var messageContainer2 = $("<tr><td class='server-response'><div class='alert  pull-right'></div></td></tr>");
+							messageContainer.parent().append(messageContainer2);
+							messageContainer = messageContainer2;
+						}
+					} else if (element.type == 4) {
+						messageContainer.find(".alert").last().append("<br /><hr />");
+						messageContainer.find(".alert").last().append(parseType4(element).contents());
+					}
+					
+				});
+			}
+
 			var table = $("#responseTable").height();
 			var lastRow = $("#responseTable >tbody >tr ").last(); 
-			var pos = lastRow.offset().top ;
-			console.log(pos);
-			
+			var pos = $("#responseTable").height();
+		
 			console.log(lastRow.find("div").text());
 			
-			$("#responseTable").animate({
-				scrollTop: pos
-			},500);
+			var objDiv = document.getElementById("responseTable");
+			objDiv.scrollTop = objDiv.scrollHeight;
+			
+			$(".btn-showmore").click(function(e) {
+				var div = $(this).parent();
+				e.preventDefault();
+				div.find("a:hidden").slice(0, 3).css("display", "block");
+				if (div.find("a:hidden").length == 0) {
+					$(this).fadeOut('slow');
+				}
+				var objDiv = document.getElementById("responseTable");
+				objDiv.scrollTop = objDiv.scrollHeight;
+			});
 			
 			$("#input").val("");
 		}
 		
-				
+		function parseType4(element) {
+			// multiple buttons
+			var trElement = $("<div></div>");	
+			if(element.payload.buttons == undefined) {
+				var button = "<button class='btn btn-primary' data-postback="+element.payload.postback+">"+element.payload.text+"</button>";
+				return $(button);
+			} else {
+				var buttons = element.payload.buttons;
+				$(buttons).each(function(index,element){
+					var btnEl = $("<button class='btn btn-primary' data-postback="+element.postback+">"+element.text+"</button>");
+		
+					btnEl.click(sendBtn);
+					
+					if (trElement == null) {
+						trElement = btnEl;
+					} else {
+						trElement.append(btnEl);
+					}
+					
+					trElement.parent().append("<br>");
+				}) 
+
+				console.log(trElement.html());
+				return trElement;
+			}
+		}
+
 		function setInputText(){
 			var inputText = $("#input").val();
-			$("#chat").text($("#chat").text() +"+ " +inputText +"\r\n");
 			$("#responseTable >tbody").append("<tr><td class='user-request'><div class='alert alert-info'>"+inputText+"</div></td></tr>");
 		}
 		
